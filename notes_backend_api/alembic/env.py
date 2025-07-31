@@ -37,7 +37,7 @@ def get_database_url():
     """Get database URL from environment variables."""
     return env_config(
         "DATABASE_URL",
-        default="postgresql://user:password@localhost/youtube_notes"
+        default="sqlite:///./youtube_notes.db"
     )
 
 

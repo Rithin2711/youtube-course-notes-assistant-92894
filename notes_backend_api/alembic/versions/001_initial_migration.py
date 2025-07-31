@@ -9,7 +9,6 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = '001'
@@ -27,8 +26,8 @@ def upgrade() -> None:
         sa.Column('username', sa.String(), nullable=False),
         sa.Column('hashed_password', sa.String(), nullable=False),
         sa.Column('is_active', sa.Boolean(), nullable=True),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+        sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('updated_at', sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
@@ -40,17 +39,17 @@ def upgrade() -> None:
         'notes',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('title', sa.String(), nullable=False),
-        sa.Column('content', sa.JSON(), nullable=True),
+        sa.Column('content', sa.Text(), nullable=True),  # JSON as TEXT for SQLite
         sa.Column('youtube_url', sa.String(), nullable=False),
         sa.Column('video_title', sa.String(), nullable=True),
         sa.Column('video_duration', sa.Integer(), nullable=True),
         sa.Column('transcript', sa.Text(), nullable=True),
         sa.Column('summary', sa.Text(), nullable=True),
-        sa.Column('timestamps', sa.JSON(), nullable=True),
+        sa.Column('timestamps', sa.Text(), nullable=True),  # JSON as TEXT for SQLite
         sa.Column('owner_id', sa.Integer(), nullable=False),
         sa.Column('is_public', sa.Boolean(), nullable=True),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+        sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('updated_at', sa.DateTime(), nullable=True),
         sa.ForeignKeyConstraint(['owner_id'], ['users.id'], ),
         sa.PrimaryKeyConstraint('id')
     )
@@ -63,7 +62,7 @@ def upgrade() -> None:
         sa.Column('note_id', sa.Integer(), nullable=False),
         sa.Column('user_id', sa.Integer(), nullable=False),
         sa.Column('permission', sa.String(), nullable=True),
-        sa.Column('shared_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('shared_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
         sa.ForeignKeyConstraint(['note_id'], ['notes.id'], ),
         sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
         sa.PrimaryKeyConstraint('id')

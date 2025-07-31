@@ -4,9 +4,11 @@ SQLAlchemy database models for the YouTube Course Notes App.
 Defines User, Note, and SharedNote tables with relationships.
 """
 
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, JSON
+import json
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from sqlalchemy.ext.hybrid import hybrid_property
 from app.database import Base
 
 
@@ -31,8 +33,8 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, onupdate=func.now())
 
     # Relationships
     notes = relationship("Note", back_populates="owner", cascade="all, delete-orphan")
@@ -64,17 +66,45 @@ class Note(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
-    content = Column(JSON, nullable=True)  # Rich text editor content
+    _content = Column("content", Text, nullable=True)  # JSON stored as TEXT for SQLite
     youtube_url = Column(String, nullable=False)
     video_title = Column(String, nullable=True)
     video_duration = Column(Integer, nullable=True)  # Duration in seconds
     transcript = Column(Text, nullable=True)
     summary = Column(Text, nullable=True)
-    timestamps = Column(JSON, nullable=True)  # Timestamped notes
+    _timestamps = Column("timestamps", Text, nullable=True)  # JSON stored as TEXT for SQLite
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     is_public = Column(Boolean, default=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, onupdate=func.now())
+
+    # JSON property getters/setters for content
+    @hybrid_property
+    def content(self):
+        if self._content:
+            return json.loads(self._content)
+        return None
+
+    @content.setter
+    def content(self, value):
+        if value is not None:
+            self._content = json.dumps(value)
+        else:
+            self._content = None
+
+    # JSON property getters/setters for timestamps
+    @hybrid_property
+    def timestamps(self):
+        if self._timestamps:
+            return json.loads(self._timestamps)
+        return None
+
+    @timestamps.setter
+    def timestamps(self, value):
+        if value is not None:
+            self._timestamps = json.dumps(value)
+        else:
+            self._timestamps = None
 
     # Relationships
     owner = relationship("User", back_populates="notes")
@@ -100,7 +130,7 @@ class SharedNote(Base):
     note_id = Column(Integer, ForeignKey("notes.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     permission = Column(String, default="read")  # read, write
-    shared_at = Column(DateTime(timezone=True), server_default=func.now())
+    shared_at = Column(DateTime, server_default=func.now())
 
     # Relationships
     note = relationship("Note", back_populates="shared_instances")
