@@ -198,7 +198,7 @@ async def ingest_youtube(
 # --- Export endpoints ---
 
 # PUBLIC_INTERFACE
-@app.get("/api/notes/{note_id}/export", summary="Export note as PDF/txt", tags=["export"])
+@app.get("/api/notes/{note_id}/export", response_model=None, summary="Export note as PDF/txt", tags=["export"])
 async def export_note(
     note_id: int,
     format: NoteExportFormat = Query(..., description="Export format: pdf or txt"),

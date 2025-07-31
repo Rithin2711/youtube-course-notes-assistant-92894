@@ -1,5 +1,6 @@
 from typing import Optional, List, Literal
 from pydantic import BaseModel, EmailStr, Field
+from enum import Enum
 
 # --- User ---
 
@@ -59,7 +60,7 @@ class NoteOut(BaseModel):
 # --- Export format ---
 
 # PUBLIC_INTERFACE
-class NoteExportFormat(str):
+class NoteExportFormat(str, Enum):
     pdf = "pdf"
     txt = "txt"
 
