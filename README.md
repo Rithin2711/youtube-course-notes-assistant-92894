@@ -1,1 +1,3 @@
-# youtube-course-notes-assistant-92894
+# Project Repository
+
+This is the initial README file for the project.
